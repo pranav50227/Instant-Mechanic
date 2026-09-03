@@ -40,12 +40,19 @@ import com.example.instantmechanicassignment.presentation.detail.GarageDetailAct
 import com.example.instantmechanicassignment.presentation.messages.MessagesActivity
 import com.example.instantmechanicassignment.presentation.profile.ProfileActivity
 import com.example.instantmechanicassignment.ui.theme.InstantMechanicAssignmentTheme
+import com.example.instantmechanicassignment.model.Mechanic
+import com.example.instantmechanicassignment.model.Service
+import com.example.instantmechanicassignment.model.WorkingHours
+
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 val repository = MechanicRepositoryImpl(RetrofitInstance.apiService)
                 val viewModel: HomeViewModel = viewModel(
                     factory = HomeViewModel.Factory(repository)
@@ -123,7 +130,7 @@ fun HomeContent(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "InstantMechanic",
-                            color = colorResource(id = R.color.dark_blue),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         )
@@ -131,7 +138,11 @@ fun HomeContent(
                 },
                 navigationIcon = {
                     IconButton(onClick = { /* TODO */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 },
                 actions = {
@@ -140,25 +151,26 @@ fun HomeContent(
                             .padding(end = 16.dp)
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable { onNavClick(ProfileActivity::class.java) }
                     ) {
                         // Placeholder for profile image
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile",
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier.align(Alignment.Center),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
                 NavigationBarItem(
@@ -167,11 +179,11 @@ fun HomeContent(
                     icon = { Icon(Icons.Default.Explore, contentDescription = "Explore") },
                     label = { Text("Explore") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorResource(id = R.color.blue),
-                        selectedTextColor = colorResource(id = R.color.blue),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color.Transparent
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.outline,
+                        unselectedTextColor = MaterialTheme.colorScheme.outline,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 )
                 NavigationBarItem(
@@ -194,7 +206,7 @@ fun HomeContent(
                 )
             }
         },
-        containerColor = Color(0xFFF8F9FA) // Light background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -204,7 +216,7 @@ fun HomeContent(
             // Search and Filter Section
             Column(
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Row(
@@ -221,8 +233,10 @@ fun HomeContent(
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = Color.LightGray,
-                            focusedBorderColor = colorResource(id = R.color.blue)
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         ),
                         singleLine = true
                     )
@@ -234,15 +248,15 @@ fun HomeContent(
                         modifier = Modifier.height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         contentPadding = PaddingValues(horizontal = 12.dp),
-                        border = BorderStroke(1.dp, Color.LightGray)
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                     ) {
                         Icon(
                             Icons.Default.FilterList,
                             contentDescription = null,
-                            tint = Color.Black
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Filters", color = Color.Black)
+                        Text("Filters", color = MaterialTheme.colorScheme.onSurface)
                     }
                 }
 
@@ -260,10 +274,10 @@ fun HomeContent(
                             label = { Text(service) },
                             shape = RoundedCornerShape(20.dp),
                             colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = colorResource(id = R.color.blue),
-                                selectedLabelColor = Color.White,
-                                containerColor = Color(0xFFF1F3F4),
-                                labelColor = Color.Black
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
                             border = null
                         )
@@ -275,7 +289,7 @@ fun HomeContent(
             when (uiState) {
                 is HomeUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = colorResource(id = R.color.blue))
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
                 is HomeUiState.Success -> {
@@ -329,7 +343,10 @@ fun MechanicCard(
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
@@ -345,7 +362,7 @@ fun MechanicCard(
                         text = name,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colorResource(id = R.color.dark_blue)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -364,7 +381,7 @@ fun MechanicCard(
                         )
                         Text(
                             text = " ($reviews Reviews)",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             fontSize = 14.sp
                         )
                     }
@@ -372,12 +389,12 @@ fun MechanicCard(
 
                 if (isOpen) {
                     Surface(
-                        color = Color(0xFFE8F5E9),
+                        color = Color(0xFFE8F5E9).copy(alpha = if (isSystemInDarkTheme()) 0.2f else 1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = "Open",
-                            color = Color(0xFF2E7D32),
+                            color = if (isSystemInDarkTheme()) Color(0xFF81C784) else Color(0xFF2E7D32),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -390,7 +407,7 @@ fun MechanicCard(
 
             Text(
                 text = "$distance • $location",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 fontSize = 14.sp
             )
 
@@ -403,12 +420,13 @@ fun MechanicCard(
             ) {
                 services.forEach { service ->
                     Surface(
-                        color = Color(0xFFF1F3F4),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = service,
                             fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -424,7 +442,7 @@ fun MechanicCard(
                     .height(48.dp),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorResource(id = R.color.blue)
+                    containerColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Text("Book Appointment", fontWeight = FontWeight.Bold)
@@ -476,15 +494,66 @@ fun FlowRow(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun HomeScreenPreview() {
+    val mockWorkingHours = WorkingHours(
+        monday = "09:00 - 18:00",
+        tuesday = "09:00 - 18:00",
+        wednesday = "09:00 - 18:00",
+        thursday = "09:00 - 18:00",
+        friday = "09:00 - 18:00",
+        saturday = "10:00 - 16:00",
+        sunday = "Closed"
+    )
+
+    val mockMechanics = listOf(
+        Mechanic(
+            mechanicId = "1",
+            garageName = "Expert Auto Care",
+            imageUrl = "",
+            rating = 4.8,
+            reviewCount = 124,
+            distance = 2.5,
+            location = "Downtown",
+            address = "123 Main St",
+            phoneNumber = "555-0101",
+            isOpen = true,
+            openingHours = mockWorkingHours,
+            services = listOf(
+                Service("1", "Oil Change", "", 50.0, "30 mins"),
+                Service("2", "Brake Repair", "", 150.0, "2 hours")
+            ),
+            latitude = 0.0,
+            longitude = 0.0
+        ),
+        Mechanic(
+            mechanicId = "2",
+            garageName = "Precision Motors",
+            imageUrl = "",
+            rating = 4.5,
+            reviewCount = 89,
+            distance = 4.2,
+            location = "Westside",
+            address = "456 West Ave",
+            phoneNumber = "555-0102",
+            isOpen = false,
+            openingHours = mockWorkingHours,
+            services = listOf(
+                Service("3", "Transmission", "", 500.0, "1 day"),
+                Service("4", "Tires", "", 100.0, "1 hour")
+            ),
+            latitude = 0.0,
+            longitude = 0.0
+        )
+    )
+
     InstantMechanicAssignmentTheme {
         HomeContent(
-            uiState = HomeUiState.Empty,
+            uiState = HomeUiState.Success(mockMechanics),
             searchQuery = "",
             onSearchQueryChange = {},
-            selectedService = "",
+            selectedService = "Oil Change",
             onServiceSelected = {},
             onMechanicClick = {},
             onNavClick = {}

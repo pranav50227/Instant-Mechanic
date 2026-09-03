@@ -34,13 +34,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.instantmechanicassignment.R
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.example.instantmechanicassignment.data.local.PreferenceManager
 import com.example.instantmechanicassignment.ui.theme.InstantMechanicAssignmentTheme
 
 class MessagesActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 MessagesScreen(onNavClick = { activityClass ->
                     startActivity(Intent(this, activityClass))
                 })
@@ -100,7 +107,7 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "InstantMechanic",
-                            color = colorResource(id = R.color.dark_blue),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         )
@@ -111,7 +118,7 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                         Icon(
                             imageVector = Icons.Default.Menu,
                             contentDescription = "Menu",
-                            tint = colorResource(id = R.color.dark_blue)
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -121,24 +128,25 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                             .padding(end = 16.dp)
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                             .clickable { onNavClick(ProfileActivity::class.java) }
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Person,
                             contentDescription = "Profile",
-                            modifier = Modifier.align(Alignment.Center)
+                            modifier = Modifier.align(Alignment.Center),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
         bottomBar = {
             NavigationBar(
-                containerColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.surface,
                 tonalElevation = 8.dp
             ) {
                 NavigationBarItem(
@@ -159,11 +167,11 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                     icon = { Icon(Icons.AutoMirrored.Outlined.Message, contentDescription = "Messages") },
                     label = { Text("Messages") },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorResource(id = R.color.blue),
-                        selectedTextColor = colorResource(id = R.color.blue),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color.Transparent
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        unselectedIconColor = MaterialTheme.colorScheme.outline,
+                        unselectedTextColor = MaterialTheme.colorScheme.outline,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 )
                 NavigationBarItem(
@@ -174,7 +182,7 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                 )
             }
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -185,7 +193,7 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                 text = "Messages",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.dark_blue),
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
             )
 
@@ -197,7 +205,7 @@ fun MessagesScreen(onNavClick: (Class<*>) -> Unit) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         thickness = 0.5.dp,
-                        color = Color.LightGray.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
                     )
                 }
             }
@@ -219,13 +227,13 @@ fun ChatListItem(chat: ChatItem) {
             modifier = Modifier
                 .size(56.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE9ECEF))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Icon(
                 imageVector = Icons.Outlined.Person,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp).align(Alignment.Center),
-                tint = Color.Gray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -238,13 +246,13 @@ fun ChatListItem(chat: ChatItem) {
                 text = chat.garageName,
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = chat.lastMessage,
                 fontSize = 15.sp,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -258,7 +266,7 @@ fun ChatListItem(chat: ChatItem) {
             Text(
                 text = chat.timestamp,
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(8.dp))
             if (chat.isUnread) {
@@ -266,7 +274,7 @@ fun ChatListItem(chat: ChatItem) {
                     modifier = Modifier
                         .size(10.dp)
                         .clip(CircleShape)
-                        .background(colorResource(id = R.color.blue))
+                        .background(MaterialTheme.colorScheme.primary)
                 )
             } else {
                 Spacer(modifier = Modifier.size(10.dp))
@@ -275,7 +283,7 @@ fun ChatListItem(chat: ChatItem) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MessagesScreenPreview() {
     InstantMechanicAssignmentTheme {

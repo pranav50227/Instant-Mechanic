@@ -13,6 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+import com.example.instantmechanicassignment.data.local.PreferenceManager
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+
 sealed class ProfileUiState {
     object Loading : ProfileUiState()
     data class Success(val user: User) : ProfileUiState()
@@ -23,7 +27,10 @@ sealed class ProfileNavigationEvent {
     object NavigateToLogin : ProfileNavigationEvent()
 }
 
-class ProfileViewModel(private val authRepository: AuthRepository) : ViewModel() {
+class ProfileViewModel(
+    private val authRepository: AuthRepository,
+    private val preferenceManager: PreferenceManager
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -37,8 +44,17 @@ class ProfileViewModel(private val authRepository: AuthRepository) : ViewModel()
     private val _paymentMethods = MutableStateFlow<List<PaymentMethod>>(emptyList())
     val paymentMethods: StateFlow<List<PaymentMethod>> = _paymentMethods.asStateFlow()
 
+    val themeMode: StateFlow<String> = preferenceManager.getThemeMode()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")
+
     init {
         fetchProfile()
+    }
+
+    fun setThemeMode(mode: String) {
+        viewModelScope.launch {
+            preferenceManager.saveThemeMode(mode)
+        }
     }
 
     fun fetchProfile() {
@@ -87,10 +103,13 @@ class ProfileViewModel(private val authRepository: AuthRepository) : ViewModel()
         _navigationEvent.value = null
     }
 
-    class Factory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
+    class Factory(
+        private val authRepository: AuthRepository,
+        private val preferenceManager: PreferenceManager
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfileViewModel(authRepository) as T
+            return ProfileViewModel(authRepository, preferenceManager) as T
         }
     }
 }

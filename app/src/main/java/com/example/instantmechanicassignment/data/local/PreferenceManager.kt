@@ -13,6 +13,7 @@ class PreferenceManager(private val context: Context) {
 
     companion object {
         val AUTH_TOKEN = stringPreferencesKey("auth_token")
+        val THEME_MODE = stringPreferencesKey("theme_mode") // "light", "dark", or "system"
     }
 
     suspend fun saveToken(token: String) {
@@ -30,6 +31,18 @@ class PreferenceManager(private val context: Context) {
     suspend fun clearToken() {
         context.dataStore.edit { preferences ->
             preferences.remove(AUTH_TOKEN)
+        }
+    }
+
+    suspend fun saveThemeMode(mode: String) {
+        context.dataStore.edit { preferences ->
+            preferences[THEME_MODE] = mode
+        }
+    }
+
+    fun getThemeMode(): Flow<String> {
+        return context.dataStore.data.map { preferences ->
+            preferences[THEME_MODE] ?: "system"
         }
     }
 }

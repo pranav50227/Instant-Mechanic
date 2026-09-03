@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "InstantMechanicAssignment"
 include(":app")
- 
+include(":docs")

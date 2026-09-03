@@ -27,11 +27,19 @@ import androidx.compose.ui.unit.sp
 import com.example.instantmechanicassignment.R
 import com.example.instantmechanicassignment.ui.theme.InstantMechanicAssignmentTheme
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.example.instantmechanicassignment.data.local.PreferenceManager
+
 class BookingDetailsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 BookingDetailsScreen(onBackClick = { finish() })
             }
         }
@@ -48,7 +56,7 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
                     title = {
                         Text(
                             text = "Booking Details",
-                            color = colorResource(id = R.color.dark_blue),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 22.sp
                         )
@@ -58,12 +66,12 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = colorResource(id = R.color.dark_blue)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 )
             }
@@ -72,7 +80,7 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shadowElevation = 20.dp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Column(
                     modifier = Modifier
@@ -86,7 +94,7 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.blue)
+                            containerColor = MaterialTheme.colorScheme.primary
                         ),
                         elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                     ) {
@@ -99,7 +107,8 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
                         Text(
                             text = "Message Mechanic",
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                     
@@ -111,8 +120,8 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
                             .fillMaxWidth()
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.5.dp, Color.Red),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
+                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.error),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Cancel,
@@ -134,7 +143,7 @@ fun BookingDetailsScreen(onBackClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF8F9FA))
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -153,7 +162,7 @@ fun BookingSummaryCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -166,7 +175,7 @@ fun BookingSummaryCard() {
                     text = "Elite Auto Repair",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = colorResource(id = R.color.dark_blue)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Surface(
                     color = Color(0xFFE8F5E9),
@@ -196,17 +205,17 @@ fun BookingSummaryCard() {
                     text = " 4.9",
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = " (128 reviews)",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     fontSize = 16.sp
                 )
             }
             
             Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(thickness = 0.5.dp, color = Color.LightGray.copy(alpha = 0.5f))
+            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
             Spacer(modifier = Modifier.height(20.dp))
             
             Row(
@@ -214,21 +223,21 @@ fun BookingSummaryCard() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = "Estimated Cost", color = Color.Gray, fontSize = 14.sp)
+                    Text(text = "Estimated Cost", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 14.sp)
                     Text(
                         text = "$85 - $120",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = colorResource(id = R.color.dark_blue)
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Booking ID", color = Color.Gray, fontSize = 14.sp)
+                    Text(text = "Booking ID", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 14.sp)
                     Text(
                         text = "#IM-7842-A",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.Black
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -247,12 +256,12 @@ fun AppointmentCard() {
                 text = "Thu, Oct 26, 2023",
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 18.sp,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "10:30 AM - 11:30 AM (EST)",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 fontSize = 16.sp
             )
         }
@@ -270,13 +279,13 @@ fun GarageLocationCard() {
                 text = "420 Auto Way",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = "Motor City",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(16.dp))
             Box(
@@ -284,7 +293,7 @@ fun GarageLocationCard() {
                     .fillMaxWidth()
                     .height(120.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFFE9ECEF))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 // Map placeholder
             }
@@ -297,7 +306,7 @@ fun ServiceSummaryCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -305,7 +314,7 @@ fun ServiceSummaryCard() {
                 text = "Service Summary",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 20.dp)
             )
             
@@ -330,7 +339,7 @@ fun ServiceSummaryCard() {
                     imageVector = Icons.Outlined.Description,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = colorResource(id = R.color.blue)
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
@@ -338,12 +347,12 @@ fun ServiceSummaryCard() {
                         text = "Problem Description",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = Color.Gray
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        color = Color(0xFFF1F3F5),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
@@ -351,7 +360,7 @@ fun ServiceSummaryCard() {
                             fontSize = 15.sp,
                             modifier = Modifier.padding(16.dp),
                             lineHeight = 22.sp,
-                            color = Color(0xFF495057)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -367,7 +376,7 @@ fun ServiceItem(icon: ImageVector, title: String, content: String) {
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = colorResource(id = R.color.blue)
+            tint = MaterialTheme.colorScheme.primary
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column {
@@ -375,14 +384,14 @@ fun ServiceItem(icon: ImageVector, title: String, content: String) {
                 text = title,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = content,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -397,7 +406,7 @@ fun DetailsSectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
@@ -406,14 +415,14 @@ fun DetailsSectionCard(
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = colorResource(id = R.color.blue)
+                    tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = title,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -422,7 +431,7 @@ fun DetailsSectionCard(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun BookingDetailsScreenPreview() {
     InstantMechanicAssignmentTheme {

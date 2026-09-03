@@ -36,7 +36,10 @@ class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 val authRepository = AuthRepositoryImpl(
                     RetrofitInstance.apiService,
                     PreferenceManager(applicationContext)
@@ -70,7 +73,7 @@ class SplashActivity : ComponentActivity() {
 fun SplashScreen() {
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -82,7 +85,7 @@ fun SplashScreen() {
                 modifier = Modifier
                     .size(100.dp)
                     .background(
-                        color = colorResource(id = R.color.blue),
+                        color = MaterialTheme.colorScheme.primary,
                         shape = RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
@@ -99,7 +102,7 @@ fun SplashScreen() {
             // App Name
             Text(
                 text = "InstantMechanic",
-                color = colorResource(id = R.color.dark_blue),
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -115,7 +118,7 @@ fun SplashScreen() {
             // Tagline
             Text(
                 text = "Expert assistance, arriving shortly",
-                color = colorResource(id = R.color.gray),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -133,13 +136,13 @@ fun LoadingDots() {
             Surface(
                 modifier = Modifier.size(6.dp),
                 shape = RoundedCornerShape(50),
-                color = colorResource(id = R.color.gray)
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
             ) {}
         }
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SplashScreenPreview() {
     InstantMechanicAssignmentTheme {

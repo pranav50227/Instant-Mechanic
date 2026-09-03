@@ -24,13 +24,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.instantmechanicassignment.R
+import com.example.instantmechanicassignment.data.local.PreferenceManager
 import com.example.instantmechanicassignment.ui.theme.InstantMechanicAssignmentTheme
 
 class RequestServiceActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 RequestServiceScreen(onBackClick = { finish() })
             }
         }
@@ -54,7 +58,7 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                 title = {
                     Text(
                         text = "InstantMechanic",
-                        color = colorResource(id = R.color.dark_blue),
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
@@ -70,7 +74,8 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }
@@ -79,14 +84,17 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFF8F9FA))
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -94,12 +102,12 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                         text = "Request Service",
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colorResource(id = R.color.dark_blue)
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "Provide details about your vehicle issue to schedule a repair or maintenance session.",
                         fontSize = 14.sp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
 
@@ -110,7 +118,8 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                         text = "Vehicle Details",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     OutlinedTextField(
                         value = licensePlate,
@@ -128,12 +137,13 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                     Text(
                         text = "Service Type",
                         fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Select primary service category",
                         fontSize = 12.sp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
@@ -159,16 +169,16 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                                         },
                                         shape = RoundedCornerShape(12.dp),
                                         colors = FilterChipDefaults.filterChipColors(
-                                            selectedContainerColor = colorResource(id = R.color.blue),
-                                            selectedLabelColor = Color.White,
-                                            containerColor = Color.White,
-                                            labelColor = Color.Black
+                                            selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                            selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                                            containerColor = MaterialTheme.colorScheme.surface,
+                                            labelColor = MaterialTheme.colorScheme.onSurface
                                         ),
                                         border = FilterChipDefaults.filterChipBorder(
                                             enabled = true,
                                             selected = selectedService == service,
-                                            borderColor = Color.LightGray,
-                                            selectedBorderColor = colorResource(id = R.color.blue)
+                                            borderColor = MaterialTheme.colorScheme.outline,
+                                            selectedBorderColor = MaterialTheme.colorScheme.primary
                                         )
                                     )
                                 }
@@ -189,7 +199,8 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                         text = "Schedule Appointment",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier.padding(bottom = 12.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -224,7 +235,8 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                         text = "Problem Description",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     OutlinedTextField(
                         value = problemDescription,
@@ -247,20 +259,20 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.blue)
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Send,
                             contentDescription = null,
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Submit Request",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -269,7 +281,7 @@ fun RequestServiceScreen(onBackClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun RequestServiceScreenPreview() {
     InstantMechanicAssignmentTheme {

@@ -43,15 +43,18 @@ class ProfileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
-                val authRepository = AuthRepositoryImpl(
-                    RetrofitInstance.apiService,
-                    PreferenceManager(applicationContext)
-                )
-                val viewModel: ProfileViewModel = viewModel(
-                    factory = ProfileViewModel.Factory(authRepository)
-                )
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val authRepository = AuthRepositoryImpl(
+                RetrofitInstance.apiService,
+                preferenceManager
+            )
+            val viewModel: ProfileViewModel = viewModel(
+                factory = ProfileViewModel.Factory(authRepository, preferenceManager)
+            )
 
+            val themeMode by viewModel.themeMode.collectAsState()
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 val uiState by viewModel.uiState.collectAsState()
                 val navigationEvent by viewModel.navigationEvent.collectAsState()
 
@@ -70,6 +73,8 @@ class ProfileActivity : ComponentActivity() {
 
                 ProfileScreen(
                     uiState = uiState,
+                    themeMode = themeMode,
+                    onThemeChange = { viewModel.setThemeMode(it) },
                     onLogoutClick = { viewModel.logout() },
                     onNavClick = { activityClass ->
                         startActivity(Intent(this, activityClass))
@@ -84,6 +89,8 @@ class ProfileActivity : ComponentActivity() {
 @Composable
 fun ProfileScreen(
     uiState: ProfileUiState,
+    themeMode: String,
+    onThemeChange: (String) -> Unit,
     onLogoutClick: () -> Unit,
     onNavClick: (Class<*>) -> Unit
 ) {
@@ -101,7 +108,6 @@ fun ProfileScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "InstantMechanic",
-                            color = colorResource(id = R.color.dark_blue),
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         )
@@ -111,8 +117,7 @@ fun ProfileScreen(
                     IconButton(onClick = { /* TODO */ }) {
                         Icon(
                             imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            tint = colorResource(id = R.color.dark_blue)
+                            contentDescription = "Menu"
                         )
                     }
                 },
@@ -122,7 +127,7 @@ fun ProfileScreen(
                             .padding(end = 16.dp)
                             .size(32.dp)
                             .clip(CircleShape)
-                            .background(Color.LightGray)
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
@@ -130,17 +135,11 @@ fun ProfileScreen(
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
-                )
+                }
             )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White,
-                tonalElevation = 8.dp
-            ) {
+            NavigationBar {
                 NavigationBarItem(
                     selected = false,
                     onClick = { onNavClick(HomeActivity::class.java) },
@@ -163,18 +162,10 @@ fun ProfileScreen(
                     selected = true,
                     onClick = { /* Already here */ },
                     icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                    label = { Text("Profile") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = colorResource(id = R.color.blue),
-                        selectedTextColor = colorResource(id = R.color.blue),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color.Transparent
-                    )
+                    label = { Text("Profile") }
                 )
             }
-        },
-        containerColor = Color(0xFFF8F9FA)
+        }
     ) { paddingValues ->
         when (uiState) {
             is ProfileUiState.Loading -> {
@@ -185,13 +176,15 @@ fun ProfileScreen(
             is ProfileUiState.Success -> {
                 ProfileContent(
                     user = uiState.user,
+                    themeMode = themeMode,
+                    onThemeChange = onThemeChange,
                     paddingValues = paddingValues,
                     onLogoutClick = onLogoutClick
                 )
             }
             is ProfileUiState.Error -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = uiState.message, color = Color.Red)
+                    Text(text = uiState.message, color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -201,6 +194,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileContent(
     user: User,
+    themeMode: String,
+    onThemeChange: (String) -> Unit,
     paddingValues: PaddingValues,
     onLogoutClick: () -> Unit
 ) {
@@ -224,6 +219,11 @@ fun ProfileContent(
                 SettingsItemData(Icons.Default.CreditCard, "Payment Methods")
             )
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Theme Section
+        ThemeSelectionSection(themeMode, onThemeChange)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -274,11 +274,58 @@ fun ProfileContent(
 }
 
 @Composable
+fun ThemeSelectionSection(currentMode: String, onThemeChange: (String) -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = "THEME",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
+        )
+        
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        ) {
+            Column {
+                ThemeRow("Light", currentMode == "light") { onThemeChange("light") }
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                ThemeRow("Dark", currentMode == "dark") { onThemeChange("dark") }
+                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp)
+                ThemeRow("System Default", currentMode == "system") { onThemeChange("system") }
+            }
+        }
+    }
+}
+
+@Composable
+fun ThemeRow(label: String, isSelected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
+        RadioButton(selected = isSelected, onClick = onClick)
+    }
+}
+
+@Composable
 fun ProfileHeaderSection(user: User) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -286,13 +333,13 @@ fun ProfileHeaderSection(user: User) {
             modifier = Modifier
                 .size(100.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFFE9ECEF))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = null,
                 modifier = Modifier.size(60.dp).align(Alignment.Center),
-                tint = Color.Gray
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         
@@ -301,14 +348,13 @@ fun ProfileHeaderSection(user: User) {
         Text(
             text = user.fullName,
             fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
+            fontWeight = FontWeight.Bold
         )
         
         Text(
             text = user.email,
             fontSize = 16.sp,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.secondary
         )
     }
 }
@@ -325,14 +371,14 @@ fun SettingsSection(title: String, items: List<SettingsItemData>) {
             text = title,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.secondary,
             modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
         )
         
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Column {
@@ -341,8 +387,7 @@ fun SettingsSection(title: String, items: List<SettingsItemData>) {
                     if (index < items.size - 1) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
-                            thickness = 0.5.dp,
-                            color = Color.LightGray.copy(alpha = 0.5f)
+                            thickness = 0.5.dp
                         )
                     }
                 }
@@ -364,7 +409,7 @@ fun SettingsRow(item: SettingsItemData) {
             imageVector = item.icon,
             contentDescription = null,
             modifier = Modifier.size(24.dp),
-            tint = colorResource(id = R.color.blue)
+            tint = MaterialTheme.colorScheme.primary
         )
         
         Spacer(modifier = Modifier.width(16.dp))
@@ -373,26 +418,35 @@ fun SettingsRow(item: SettingsItemData) {
             text = item.title,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.Black,
             modifier = Modifier.weight(1f)
         )
         
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = Color.LightGray
+            tint = MaterialTheme.colorScheme.outline
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ProfileScreenPreview() {
     InstantMechanicAssignmentTheme {
         ProfileScreen(
             uiState = ProfileUiState.Success(
-                User("1", "Pranav Yadav", "Pranav Yadav", "", "", "", "")
+                User(
+                    userId = "1",
+                    fullName = "Pranav Yadav",
+                    email = "pranav@example.com",
+                    phoneNumber = "123-456-7890",
+                    city = "New Delhi",
+                    profileImage = "",
+                    createdAt = "2023-01-01"
+                )
             ),
+            themeMode = "system",
+            onThemeChange = {},
             onLogoutClick = {},
             onNavClick = {}
         )

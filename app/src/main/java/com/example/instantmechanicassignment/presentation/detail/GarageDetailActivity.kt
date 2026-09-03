@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.instantmechanicassignment.R
+import com.example.instantmechanicassignment.data.local.PreferenceManager
 import com.example.instantmechanicassignment.data.remote.RetrofitInstance
 import com.example.instantmechanicassignment.data.repository.MechanicRepositoryImpl
 import com.example.instantmechanicassignment.model.Mechanic
@@ -40,7 +41,10 @@ class GarageDetailActivity : ComponentActivity() {
         val mechanicId = intent.getStringExtra("MECHANIC_ID") ?: "M101"
         
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 val repository = MechanicRepositoryImpl(RetrofitInstance.apiService)
                 val viewModel: MechanicDetailsViewModel = viewModel(
                     factory = MechanicDetailsViewModel.Factory(repository)
@@ -54,7 +58,7 @@ class GarageDetailActivity : ComponentActivity() {
                 when (val state = uiState) {
                     is MechanicDetailsUiState.Loading -> {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = colorResource(id = R.color.blue))
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         }
                     }
                     is MechanicDetailsUiState.Success -> {
@@ -74,7 +78,7 @@ class GarageDetailActivity : ComponentActivity() {
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(text = state.message, color = Color.Red)
+                            Text(text = state.message, color = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { viewModel.retry(mechanicId) }) {
                                 Text("Retry")
@@ -144,7 +148,7 @@ fun GarageDetailScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "InstantMechanic",
-                            color = colorResource(id = R.color.dark_blue),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp
                         )
@@ -161,7 +165,8 @@ fun GarageDetailScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         },
@@ -169,7 +174,7 @@ fun GarageDetailScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shadowElevation = 8.dp,
-                color = Color.White
+                color = MaterialTheme.colorScheme.surface
             ) {
                 Button(
                     onClick = onRequestServiceClick,
@@ -179,7 +184,7 @@ fun GarageDetailScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFF9800) // Orange color
+                        containerColor = Color(0xFFFF9800) // Keep orange for CTA
                     )
                 ) {
                     Text(
@@ -197,14 +202,14 @@ fun GarageDetailScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .background(Color(0xFFF8F9FA))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             // Garage Image Banner
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .background(Color.LightGray)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 // Placeholder for actual image
                 Icon(
@@ -213,7 +218,7 @@ fun GarageDetailScreen(
                     modifier = Modifier
                         .size(64.dp)
                         .align(Alignment.Center),
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -228,15 +233,15 @@ fun GarageDetailScreen(
                         text = mechanic.garageName,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colorResource(id = R.color.dark_blue)
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Surface(
-                        color = if (mechanic.isOpen) Color(0xFFE8F5E9) else Color(0xFFFFEBEE),
+                        color = if (mechanic.isOpen) Color(0xFFE8F5E9).copy(alpha = if (MaterialTheme.colorScheme.surface == Color.Black) 0.1f else 1f) else Color(0xFFFFEBEE).copy(alpha = if (MaterialTheme.colorScheme.surface == Color.Black) 0.1f else 1f),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Text(
                             text = if (mechanic.isOpen) "Open Now" else "Closed",
-                            color = if (mechanic.isOpen) Color(0xFF2E7D32) else Color.Red,
+                            color = if (mechanic.isOpen) Color(0xFF2E7D32) else MaterialTheme.colorScheme.error,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -257,11 +262,12 @@ fun GarageDetailScreen(
                     Text(
                         text = " ${mechanic.rating}",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = " (${mechanic.reviewCount} Reviews)",
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         fontSize = 16.sp
                     )
                 }
@@ -272,7 +278,7 @@ fun GarageDetailScreen(
                     text = mechanic.address,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
-                    color = Color.DarkGray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -286,7 +292,7 @@ fun GarageDetailScreen(
                             .height(48.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.blue)
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         Icon(Icons.Default.Phone, contentDescription = null)
@@ -302,12 +308,12 @@ fun GarageDetailScreen(
                             .weight(0.4f)
                             .height(48.dp),
                         shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, colorResource(id = R.color.blue))
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
                     ) {
                         Icon(
                             Icons.Default.Navigation,
                             contentDescription = "Directions",
-                            tint = colorResource(id = R.color.blue)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
@@ -319,12 +325,16 @@ fun GarageDetailScreen(
                     text = "Available Services",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column {
@@ -338,7 +348,10 @@ fun GarageDetailScreen(
                             }
                             ServiceRow(icon, service.serviceName)
                             if (index < mechanic.services.size - 1) {
-                                HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = Color(0xFFEEEEEE))
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                )
                             }
                         }
                     }
@@ -351,12 +364,16 @@ fun GarageDetailScreen(
                     text = "Working Hours",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -377,14 +394,15 @@ fun GarageDetailScreen(
                     text = "Location",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color.LightGray)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     // Placeholder for Map
                     Icon(
@@ -393,7 +411,7 @@ fun GarageDetailScreen(
                         modifier = Modifier
                             .size(48.dp)
                             .align(Alignment.Center),
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
@@ -416,16 +434,16 @@ fun ServiceRow(icon: ImageVector, name: String) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = colorResource(id = R.color.blue),
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = name, fontSize = 16.sp)
+            Text(text = name, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
         }
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = Color.Gray
+            tint = MaterialTheme.colorScheme.outline
         )
     }
 }
@@ -438,17 +456,17 @@ fun WorkingHourRow(day: String, hours: String, isClosed: Boolean = false) {
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(text = day, color = Color.Gray, fontSize = 14.sp)
+        Text(text = day, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), fontSize = 14.sp)
         Text(
             text = hours,
-            color = if (isClosed) Color.Red else Color.Black,
+            color = if (isClosed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
             fontSize = 14.sp,
             fontWeight = if (isClosed) FontWeight.Bold else FontWeight.Normal
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun GarageDetailScreenPreview() {
     InstantMechanicAssignmentTheme {

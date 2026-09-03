@@ -41,7 +41,10 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 val authRepository = AuthRepositoryImpl(
                     RetrofitInstance.apiService,
                     PreferenceManager(applicationContext)
@@ -93,7 +96,7 @@ fun LoginScreen(
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color.White
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -107,7 +110,7 @@ fun LoginScreen(
             // App Name
             Text(
                 text = "InstantMechanic",
-                color = colorResource(id = R.color.dark_blue),
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -116,7 +119,7 @@ fun LoginScreen(
             // Subtitle
             Text(
                 text = "Expert assistance, arriving shortly.",
-                color = colorResource(id = R.color.gray),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 8.dp)
@@ -128,7 +131,10 @@ fun LoginScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
             ) {
                 Column(
@@ -155,7 +161,7 @@ fun LoginScreen(
                     Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = "Forgot Password?",
-                            color = colorResource(id = R.color.blue),
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier
@@ -200,19 +206,19 @@ fun LoginScreen(
                             .height(50.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.blue)
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         if (loginState is LoginState.Loading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 strokeWidth = 2.dp
                             )
                         } else {
                             Text(
                                 text = "Login",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -222,7 +228,7 @@ fun LoginScreen(
                     if (loginState is LoginState.Error) {
                         Text(
                             text = loginState.message,
-                            color = Color.Red,
+                            color = MaterialTheme.colorScheme.error,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(top = 8.dp)
                         )
@@ -240,18 +246,18 @@ fun LoginScreen(
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     thickness = 1.dp,
-                    color = Color.LightGray
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                 )
                 Text(
                     text = " OR ",
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 12.sp
                 )
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
                     thickness = 1.dp,
-                    color = Color.LightGray
+                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                 )
             }
 
@@ -264,12 +270,12 @@ fun LoginScreen(
             ) {
                 Text(
                     text = "Don't have an account? ",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "Sign Up",
-                    color = colorResource(id = R.color.blue),
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onSignUpClick() }
@@ -279,14 +285,14 @@ fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
     InstantMechanicAssignmentTheme {
         LoginScreen(
-            email = "",
+            email = "john@example.com",
             onEmailChange = {},
-            password = "",
+            password = "password",
             onPasswordChange = {},
             isLoginEnabled = true,
             loginState = LoginState.Idle,

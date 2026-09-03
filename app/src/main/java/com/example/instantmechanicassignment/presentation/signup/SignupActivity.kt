@@ -38,7 +38,10 @@ class SignupActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            InstantMechanicAssignmentTheme {
+            val preferenceManager = remember { PreferenceManager(applicationContext) }
+            val themeMode by preferenceManager.getThemeMode().collectAsState(initial = "system")
+
+            InstantMechanicAssignmentTheme(themeMode = themeMode) {
                 val authRepository = AuthRepositoryImpl(
                     RetrofitInstance.apiService,
                     PreferenceManager(applicationContext)
@@ -112,17 +115,17 @@ fun SignupScreen(
                 title = {
                     Text(
                         text = "InstantMechanic",
-                        color = colorResource(id = R.color.dark_blue),
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-        containerColor = Color.White
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -136,7 +139,7 @@ fun SignupScreen(
                 text = "Create Account",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = colorResource(id = R.color.black),
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start
             )
@@ -144,7 +147,7 @@ fun SignupScreen(
             Text(
                 text = "Sign up to request immediate roadside assistance and mechanic services.",
                 fontSize = 14.sp,
-                color = colorResource(id = R.color.gray),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 24.dp),
@@ -154,7 +157,10 @@ fun SignupScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(
@@ -228,7 +234,7 @@ fun SignupScreen(
                         Text(
                             text = "Must be at least 8 characters.",
                             fontSize = 12.sp,
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.outline,
                             modifier = Modifier.padding(start = 4.dp, top = 4.dp)
                         )
                     }
@@ -244,13 +250,13 @@ fun SignupScreen(
                             .height(56.dp),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorResource(id = R.color.blue)
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         if (signupState is SignupState.Loading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onPrimary,
                                 strokeWidth = 2.dp
                             )
                         } else {
@@ -260,7 +266,7 @@ fun SignupScreen(
                             ) {
                                 Text(
                                     text = "Sign Up",
-                                    color = Color.White,
+                                    color = MaterialTheme.colorScheme.onPrimary,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -268,7 +274,7 @@ fun SignupScreen(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                     contentDescription = null,
-                                    tint = Color.White
+                                    tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
                         }
@@ -277,7 +283,7 @@ fun SignupScreen(
                     if (signupState is SignupState.ApiError) {
                         Text(
                             text = signupState.message,
-                            color = Color.Red,
+                            color = MaterialTheme.colorScheme.error,
                             fontSize = 12.sp,
                             modifier = Modifier.padding(top = 4.dp)
                         )
@@ -294,12 +300,12 @@ fun SignupScreen(
             ) {
                 Text(
                     text = "Already have an account? ",
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.outline,
                     fontSize = 14.sp
                 )
                 Text(
                     text = "Log in here",
-                    color = colorResource(id = R.color.blue),
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onLoginClick() }
@@ -311,7 +317,7 @@ fun SignupScreen(
             // Terms & Privacy
             Text(
                 text = "By signing up, you agree to our Terms of Service and Privacy Policy.",
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.outline,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -322,7 +328,7 @@ fun SignupScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun SignupScreenPreview() {
     InstantMechanicAssignmentTheme {
