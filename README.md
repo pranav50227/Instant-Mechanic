@@ -1,6 +1,6 @@
 # 🚗 InstantMechanic
 
-An Android application that enables users to discover nearby mechanics, request roadside services, manage bookings, and communicate with garages through a modern and intuitive user interface.
+An Android application that enables users to discover nearby mechanics, request roadside services, manage bookings, and communicate with garages through a modern and intuitive user interface built entirely with Jetpack Compose.
 
 ---
 
@@ -38,211 +38,78 @@ An Android application that enables users to discover nearby mechanics, request 
 
 # 📖 About the Project
 
-InstantMechanic is a modern Android application developed using **Kotlin** and **MVVM Architecture**. The application allows users to browse nearby mechanics, explore garage details, request vehicle servicing, manage service bookings, and communicate with mechanics from a unified interface.
+InstantMechanic is a modern Android application developed using **Kotlin**, **Jetpack Compose**, and **MVVM Architecture**. The application allows users to browse nearby mechanics, explore garage details, request vehicle servicing, manage service bookings, and communicate with mechanics from a unified interface.
 
-The project follows Android development best practices with proper separation of concerns using MVVM, Repository Pattern, Hilt Dependency Injection, StateFlow, and Material Design components.
+The project follows Android development best practices with proper separation of concerns using MVVM, Repository Pattern, Hilt Dependency Injection, StateFlow, and Material Design 3.
 
 ---
 
 # ✨ Features
 
 ## Authentication
+- **Splash Screen**: Initial entry with session check.
+- **Login/Signup**: Secure authentication flows with input validation.
 
-- Splash Screen
-- Login
-- Signup
-- Session Management
+## discovery
+- **Home**: View nearby mechanics, search by name, and filter by services (Oil Change, Brake Repair, etc.).
+- **Garage Details**: Comprehensive information including ratings, distance, working hours, and available services.
 
----
+## Service Management
+- **Request Service**: Easy-to-use form to describe vehicle issues and book appointments.
+- **My Bookings**: Track upcoming and past service requests with real-time status updates.
+- **Booking Details**: Full summary of scheduled services and garage info.
 
-## Home
-
-- View nearby mechanics
-- Search mechanics
-- Filter mechanics
-- Garage ratings
-- Distance
-- Available services
-- Open / Closed status
-
----
-
-## Garage Details
-
-- Garage information
-- Rating
-- Address
-- Working Hours
-- Contact Number
-- Services Offered
-- Request Service
-
----
-
-## Request Service
-
-- Vehicle Number
-- Service Selection
-- Appointment Date
-- Appointment Time
-- Problem Description
-- Form Validation
-
----
-
-## Bookings
-
-- Upcoming Bookings
-- Booking History
-- Booking Status
-- Cancel Booking
-- Reschedule Booking
-
----
-
-## Booking Details
-
-- Booking Summary
-- Garage Details
-- Vehicle Details
-- Appointment Details
-- Estimated Cost
-- Problem Description
-
----
-
-## Messages
-
-- Conversation List
-- Latest Messages
-- Unread Indicators
-
----
-
-## Profile
-
-- User Information
-- Vehicles
-- Settings
-- Logout
+## Communication & Personalization
+- **Messages**: Direct real-time chat with mechanics and garages.
+- **Profile**: Manage personal details, vehicle information, and app settings.
 
 ---
 
 # 🏗️ Project Architecture
 
-The application follows **MVVM (Model–View–ViewModel)** architecture.
+The application follows the **MVVM (Model–View–ViewModel)** architecture.
 
 ```
-UI
+UI (Jetpack Compose)
 │
 ▼
-ViewModel
+ViewModel (UI State Management)
 │
 ▼
-Repository
+Repository (Single Source of Truth)
 │
-├────────── Remote Data Source
+├────────── Remote Data Source (Retrofit)
 │
-└────────── Local Data Source
-│
-▼
-Repository
-│
-▼
-ViewModel
-│
-▼
-UIState
-│
-▼
-UI Rendering
+└────────── Local Data Source (Mock Data / DataStore)
 ```
-
----
-
-## Why MVVM?
-
-The MVVM architecture separates responsibilities into independent layers.
-
-### UI Layer
-
-Responsible for
-
-- Rendering data
-- User interaction
-- Observing UIState
-
-The UI never directly communicates with APIs or databases.
-
----
-
-### ViewModel
-
-Responsible for
-
-- Managing UI State
-- Handling User Events
-- Calling Repository Methods
-- Processing Business Logic
-- Surviving Configuration Changes
-
----
-
-### Repository
-
-Acts as the **Single Source of Truth**.
-
-Responsible for
-
-- API Calls
-- Local Storage
-- Data Mapping
-- Returning Results
-
----
-
-### Data Layer
-
-Responsible for
-
-- Retrofit
-- Mock Data
-- Future Database Support
 
 ---
 
 # 📂 Project Structure
 
 ```
-com.instantmechanic
+com.example.instantmechanicassignment
 
 ├── data
-│   ├── api
-│   ├── local
-│   ├── model
-│   ├── repository
-│   └── mock
+│   ├── api          # Retrofit API definitions
+│   ├── model        # Domain and Data models
+│   ├── repository   # Data handling and business logic
+│   └── mock         # High-fidelity mock data providers
 │
-├── di
+├── presentation     # Feature-based UI (Jetpack Compose)
+│   ├── splash       # Entry screen
+│   ├── login        # Authentication
+│   ├── signup       # Registration
+│   ├── home         # discovery and Filtering
+│   ├── detail       # Garage/Mechanic Information
+│   ├── request      # Service Booking Flow
+│   ├── bookings     # Management of Services
+│   ├── messages     # Chat and Communication
+│   └── profile      # User settings
 │
-├── ui
-│   ├── splash
-│   ├── login
-│   ├── signup
-│   ├── home
-│   ├── mechanic
-│   ├── request
-│   ├── booking
-│   ├── messages
-│   └── profile
-│
-├── viewmodel
-│
-├── navigation
-│
-├── utils
-│
-└── InstantMechanicApplication
+├── di               # Hilt Dependency Injection modules
+├── navigation       # Compose Navigation setup
+└── utils            # Extensions and Helpers
 ```
 
 ---
@@ -252,460 +119,41 @@ com.instantmechanic
 | Category | Technology |
 |-----------|------------|
 | Language | Kotlin |
-| Architecture | MVVM |
+| UI Framework | **Jetpack Compose** |
+| Design System | Material Design 3 |
+| Architecture | MVVM + Repository Pattern |
 | Dependency Injection | Hilt |
 | Networking | Retrofit |
-| Asynchronous Programming | Kotlin Coroutines |
-| State Management | StateFlow |
+| Async/Reactive | Coroutines & StateFlow |
 | Image Loading | Coil |
-| UI | XML / Material Design 3 |
-| Navigation | Navigation Component |
-| IDE | Android Studio |
-
----
-
-# 🧩 Dependency Injection
-
-The application uses **Hilt** for Dependency Injection.
-
-Dependency Graph
-
-```
-Application
-
-↓
-
-Hilt
-
-↓
-
-Network Module
-
-↓
-
-Retrofit
-
-↓
-
-ApiService
-
-↓
-
-Repositories
-
-↓
-
-ViewModels
-
-↓
-
-Activities / Fragments
-```
-
-Hilt automatically provides
-
-- Retrofit
-- ApiService
-- Repositories
-- SharedPreferences
-- ViewModels
-
-without manual object creation.
-
----
-
-# 📡 Data Flow
-
-```
-User Interaction
-
-↓
-
-Activity / Fragment
-
-↓
-
-ViewModel
-
-↓
-
-Repository
-
-↓
-
-API / Mock Data
-
-↓
-
-Repository
-
-↓
-
-ViewModel
-
-↓
-
-UiState
-
-↓
-
-UI
-```
-
----
-
-# 🎯 UI State Management
-
-Every screen follows a unified UI state.
-
-```
-UiState
-
-├── Idle
-
-├── Loading
-
-├── Success
-
-├── Error
-
-└── Empty
-```
-
-Each ViewModel exposes StateFlow of UiState.
-
-The UI observes the state and renders the appropriate screen.
-
----
-
-# 📱 Application Screens
-
-## Splash
-
-- Application Branding
-- Session Validation
-- Navigation
-
----
-
-## Login
-
-- Email Authentication
-- Password Validation
-
----
-
-## Signup
-
-- User Registration
-- Form Validation
-
----
-
-## Home
-
-- Mechanics List
-- Search
-- Filter
-
----
-
-## Garage Details
-
-- Mechanic Details
-- Available Services
-- Working Hours
-
----
-
-## Request Service
-
-- Booking Form
-- Vehicle Details
-- Service Selection
-
----
-
-## My Bookings
-
-- Booking History
-- Upcoming Services
-
----
-
-## Booking Details
-
-- Service Information
-- Appointment Details
-
----
-
-## Messages
-
-- Chat List
-- Latest Conversation
-
----
-
-## Profile
-
-- User Information
-- Vehicles
-- Settings
-
----
-
-# 📦 Data Models
-
-The application contains the following models.
-
-- User
-- Mechanic
-- Service
-- Vehicle
-- WorkingHours
-- Booking
-- ServiceRequest
-- Chat
-- Message
-- Notification
-- PaymentMethod
-
----
-
-# 📡 API / Data Details
-
-The application currently uses **Mock Data**.
-
-The repository layer is structured so that Retrofit APIs can replace mock data without changing the ViewModels.
-
-### Planned Endpoints
-
-```
-GET
-
-/mechanics
-```
-
-```
-GET
-
-/mechanics/{id}
-```
-
-```
-POST
-
-/request
-```
-
-```
-GET
-
-/bookings
-```
-
-```
-GET
-
-/bookings/{id}
-```
-
-```
-GET
-
-/chats
-```
-
-```
-GET
-
-/messages
-```
-
-```
-GET
-
-/profile
-```
-
----
-
-# 🧪 Repository Structure
-
-```
-AuthRepository
-
-↓
-
-Login
-
-Signup
-
-Logout
-
-Session
-```
-
-```
-MechanicRepository
-
-↓
-
-Mechanics
-
-Search
-
-Filters
-
-Garage Details
-```
-
-```
-BookingRepository
-
-↓
-
-Bookings
-
-Booking Details
-
-Create Booking
-
-Cancel Booking
-
-Reschedule
-```
-
-```
-ChatRepository
-
-↓
-
-Chats
-
-Messages
-
-Send Message
-```
-
-```
-ProfileRepository
-
-↓
-
-Profile
-
-Settings
-
-Logout
-```
-
-```
-VehicleRepository
-
-↓
-
-Vehicles
-
-Update Vehicle
-```
+| Local Storage | DataStore Preferences |
+| IDE | Android Studio (Ladybug) |
 
 ---
 
 # 🚀 Running the Project
 
-### Clone the Repository
-
-```bash
-git clone YOUR_REPOSITORY_URL
-```
-
----
-
-### Open
-
-Android Studio
-
----
-
-### Sync
-
-Gradle
-
----
-
-### Run
-
-Select an Emulator or Physical Device.
-
-Click **Run**.
-
----
-
-# 📌 Assumptions
-
-- Authentication is simulated.
-- Mechanics are loaded from mock data.
-- Bookings are simulated.
-- Messaging uses sample conversations.
-- Static map preview is displayed.
-- Payment functionality is not implemented.
-- Notifications are represented as mock objects.
-- One user can own multiple vehicles.
-- Search and filtering are performed on mock data.
-- The repository layer is prepared for future REST API integration.
-
----
-
-# 🌟 Additional Features
-
-- Material Design 3 UI
-- Hilt Dependency Injection
-- MVVM Architecture
-- Repository Pattern
-- StateFlow State Management
-- Search Mechanics
-- Filter Mechanics
-- Form Validation
-- Modular Package Structure
-- Reusable Components
-- Loading State Handling
-- Error State Handling
-- Empty State Handling
-- Scalable Architecture
-- Production-Oriented Folder Structure
-
----
-
-# 🔮 Future Improvements
-
-- Firebase Authentication
-- Google Maps Integration
-- Room Database
-- Offline Caching
-- Push Notifications
-- Online Payments
-- WorkManager Background Sync
-- Pagination
-- Unit Testing
-- Dark Theme
-- Multi-language Support
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/pranav50227/InstantMechanicAssignment.git
+   ```
+2. **Open in Android Studio**: Ensure you are using Android Studio Ladybug or newer for full Compose support.
+3. **Sync Gradle**: Allow the project to download all necessary dependencies.
+4. **Run**: Deploy the app to an emulator or physical device (API 24+ recommended).
 
 ---
 
 # 👨‍💻 Developed By
 
-**Your Name**
+**Pranav**
 
 Android Developer
 
-GitHub: https://github.com/pranav50227
-
-LinkedIn: https://linkedin.com/in/pranav50227
+GitHub: [pranav50227](https://github.com/pranav50227)  
+LinkedIn: [pranav50227](https://linkedin.com/in/pranav50227)
 
 ---
 
 # 📄 License
 
-This project has been developed as part of the **Android Development Internship Assignment** for evaluation purposes.
+This project has been developed as part of an **Android Development Assignment** for evaluation purposes.
